@@ -55,12 +55,24 @@ async def getApiContent(content_type: str, content: str, base_url: str = base_ur
             return await resp.json()
 
 
+async def getImage(url: str):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            try:
+                resp.raise_for_status()
+            except Exception as e:
+                print(e)
+            return await resp.read()
+
+
 # ___INTERFACES___
 async def getPokemon(pokemon: str):
     result = await asyncio.gather(
         getPokemonStats(pokemon),
         getPokemonDetails(pokemon),
     )
+    image = await asyncio.gather(getImage(result[0]["sprites"]["front_default"]))
+    result = (*result, *image)
     return result
 
 
